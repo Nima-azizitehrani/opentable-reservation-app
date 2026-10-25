@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="grid" style="margin-top:14px;">
+  <div class="card" style="grid-column: span 7; padding:0; overflow:hidden;">
+    <img src="{{ url_for('static', filename=restaurant_image(r[0])) }}" style="width:100%; height:300px; object-fit:cover; display:block;" alt="Restaurant photo">
+    <div style="padding:16px;">
+      <h2 style="margin:0;">{{ r[1] }}</h2>
+      <div class="muted" style="margin-top:6px;">{{ r[5] }}, {{ r[6] }} • {{ r[2] }} • {{ dollars(r[3]) }}</div>
+      <div class="chips" style="margin-top:10px;">
+        <span class="chip">Avg Rating: {{ avg_rating if avg_rating else "—" }} ★</span>
+        {% if r[4] %}<span class="chip">📞 {{ r[4] }}</span>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="grid-column: span 5;">
+    <h3 style="margin-top:0;">Book a table</h3>
+    <p class="muted" style="margin-top:0;">This uses the <b>MakeReservation</b> stored procedure (plus triggers).</p>
+    <form method="post" action="{{ url_for('reserve') }}">
+      <input type="hidden" name="restaurant_id" value="{{ r[0] }}"/>
+      <label>Customer ID</label>
+      <input name="customer_id" placeholder="e.g., 1"/>
+      <label>Table</label>
+      <select name="table_id">
+        {% for t in tables %}
+          <option value="{{ t[0] }}">Table {{ t[0] }} (cap {{ t[1] }})</option>
+        {% endfor %}
+      </select>
+      <label>DateTime</label>
+      
+      <input name="reservation_datetime" type="datetime-local" required />
+      <label>Party Size</label>
+      <input name="party_size" placeholder="e.g., 2"/>
+      <div style="margin-top:12px;">
+        <button class="btn primary" type="submit" style="width:100%;">Reserve</button>
+      </div>
+      <p class="muted" style="font-size:12px; margin-top:12px;">Demo tip: try double-booking the same table/time to show DB enforcement.</p>
+    </form>
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <h3 style="margin-top:0;">Recent reviews</h3>
+  {% if reviews|length == 0 %}
+    <p class="muted">No reviews yet.</p>
+  {% else %}
+    <table>
+      <thead><tr><th>Rating</th><th>Comment</th><th>Created</th></tr></thead>
+      <tbody>
+        {% for rv in reviews %}
+          <tr>
+            <td>{{ rv[1] }} ★</td>
+            <td>{{ rv[2] }}</td>
+            <td>{{ rv[3] }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+</div>
+{% endblock %}

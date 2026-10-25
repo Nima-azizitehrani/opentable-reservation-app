@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="hero">
+  <h1>{{ title }}</h1>
+  {% if subtitle %}<p class="muted">{{ subtitle }}</p>{% endif %}
+  <p class="muted" style="font-size:12px;">Showing {{ rows|length }} row(s).</p>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  {% if rows|length == 0 %}
+    <p class="muted">No results. If this seems unexpected, add more sample data.</p>
+  {% else %}
+    <table>
+      <thead>
+        <tr>{% for c in cols %}<th>{{ c }}</th>{% endfor %}</tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          <tr>{% for cell in r %}<td>{{ cell }}</td>{% endfor %}</tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+</div>
+{% endblock %}

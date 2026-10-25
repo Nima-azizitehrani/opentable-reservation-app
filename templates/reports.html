@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="hero">
+  <h1>Manager Reports</h1>
+  <p class="muted">Run the 18 built-in SQL reports.</p>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <div class="muted" style="font-size:12px; margin-bottom:8px;">City selection (only used for the “favorited all restaurants in a city” report)</div>
+  <div class="grid" style="margin-top:0; align-items:end;">
+    <div style="grid-column: span 6;">
+      <label>City</label>
+      <select name="city" form="runReportForm" id="citySelect">
+        <option value="">— All cities —</option>
+        {% for c in cities %}
+          <option value="{{ c }}" {% if c==default_city %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div style="grid-column: span 6;">
+      <div class="muted" style="font-size:12px; padding-top:22px;">Tip: most reports don’t need a city.</div>
+    </div>
+  </div>
+
+  <form id="runReportForm" method="post" action="{{ url_for('run_report') }}">
+    <input type="hidden" name="report_id" id="reportIdInput" />
+    <input type="hidden" name="city" id="cityHidden" value="{{ default_city }}" />
+  </form>
+
+  <script>
+    const citySelect = document.getElementById('citySelect');
+    const cityHidden = document.getElementById('cityHidden');
+    citySelect.addEventListener('change', () => { cityHidden.value = citySelect.value; });
+
+    function runReport(id){
+      document.getElementById('reportIdInput').value = id;
+      cityHidden.value = citySelect.value;
+      document.getElementById('runReportForm').submit();
+    }
+  </script>
+
+  <div class="grid" style="margin-top:14px;">
+    {% for group_name, reports in groups.items() %}
+      <div class="card" style="grid-column: span 12; background: var(--surface2);">
+        <h3 style="margin-bottom:10px;">{{ group_name }}</h3>
+        <div class="btnrow">
+          {% for r in reports %}
+            <button class="btn" type="button" onclick="runReport('{{ r.id }}')">
+              {{ r.id }}. {{ r.title }}
+            </button>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

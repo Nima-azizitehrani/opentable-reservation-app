@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="hero">
+  <h1>Customers & Reservations</h1>
+  <p class="muted">Create a customer, make/cancel/update reservations (procedures + validations).</p>
+</div>
+
+<div class="grid">
+  <div class="card" style="grid-column: span 6;">
+    <h3>Create customer</h3>
+    <form method="post" action="{{ url_for('create_customer') }}" autocomplete="off">
+      <div class="grid" style="margin-top:0;">
+        <div style="grid-column: span 6;">
+          <label>First name</label>
+          <input name="first_name" required/>
+        </div>
+        <div style="grid-column: span 6;">
+          <label>Last name</label>
+          <input name="last_name" required />
+        </div>
+        <div style="grid-column: span 6;">
+          <label>Phone (digits only, 10–15)</label>
+          <input name="phone" required inputmode="numeric" pattern="[0-9]{10,15}" maxlength="15"/>
+        </div>
+        <div style="grid-column: span 6;">
+          <label>Email (optional)</label>
+          <input name="email" type="email"/>
+        </div>
+      </div>
+      <div style="margin-top:4px;">
+        <button class="btn primary" type="submit">Create</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card" style="grid-column: span 6;">
+    <h3>Make reservation</h3>
+    <form method="post" action="{{ url_for('make_reservation') }}">
+      <label>Customer ID</label>
+      <input name="customer_id" required />
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div>
+          <label>Restaurant</label>
+          <select name="restaurant_id" required>
+            {% for r in restaurants %}
+              <option value="{{ r.RestaurantID }}">{{ r.City }} — {{ r.Name }} (ID {{ r.RestaurantID }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Table ID</label>
+          <select name="table_id" required>
+            {% for t in tables %}
+              <option value="{{ t.TableID }}">Table {{ t.TableNumber }} (Cap {{ t.Capacity }}) — Rest {{ t.RestaurantID }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:2fr 1fr; gap:10px; margin-top:0;">
+        <div>
+          <label>Date & time</label>
+          <input name="reservation_datetime" type="datetime-local" required />
+        </div>
+        <div>
+          <label>Party size</label>
+          <input name="party_size" type="number" min="1" max="100" required />
+        </div>
+      </div>
+
+      <button class="btn primary" type="submit">Reserve</button>
+      <p class="muted" style="margin-top:8px; font-size:12px;">
+        Validations: party size must fit table capacity, and no double booking on the same table/date.
+      </p>
+    </form>
+  </div>
+
+  <div class="card" style="grid-column: span 6;">
+    <h3>Update reservation</h3>
+    <form method="post" action="{{ url_for('update_reservation') }}">
+      <label>Reservation ID</label>
+      <input name="reservation_id" required />
+
+      <div style="display:grid; grid-template-columns:2fr 1fr; gap:10px;">
+        <div>
+          <label>New date & time</label>
+          <input name="new_reservation_datetime" type="datetime-local" required />
+        </div>
+        <div>
+          <label>New party size</label>
+          <input name="new_party_size" type="number" min="1" max="100" required />
+        </div>
+      </div>
+
+      <button class="btn" type="submit">Update</button>
+    </form>
+  </div>
+
+  <div class="card" style="grid-column: span 6;">
+    <h3>Cancel or delete reservation</h3>
+
+    <form method="post" action="{{ url_for('cancel_reservation') }}" style="margin-bottom:16px;">
+      <label>Reservation ID</label>
+      <input name="reservation_id" required />
+      <button class="btn" type="submit">Cancel (procedure)</button>
+    </form>
+
+    <hr style="border:0; border-top:1px solid var(--border); margin:16px 0;">
+
+    <form method="post" action="{{ url_for('delete_reservation') }}" onsubmit="return confirm('Delete this reservation permanently?');">
+      <label>Reservation ID</label>
+      <input name="reservation_id" required />
+      <button class="btn" type="submit" style="border-color:#fca5a5; color:#9f1239;">Delete permanently</button>
+      <p class="muted" style="margin-top:8px; font-size:12px;">Delete may fail if there is a review linked to the reservation.</p>
+    </form>
+  </div>
+
+  <!-- Reference tables -->
+  <div class="card" style="grid-column: span 12;">
+    <h3 style="margin-bottom:16px;">Current data (for demo)</h3>
+    <div class="grid" style="margin-top:0;">
+
+      <div style="grid-column: span 6;">
+        <h4 style="margin:0 0 8px; font-size:13px; color:var(--muted);">CUSTOMERS</h4>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Name</th><th>Phone</th><th>Email</th></tr>
+            </thead>
+            <tbody>
+              {% for c in customers %}
+                <tr>
+                  <td>{{ c.CustomerID }}</td>
+                  <td>{{ c.FirstName }} {{ c.LastName }}</td>
+                  <td>{{ c.Phone }}</td>
+                  <td>{{ c.Email }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="grid-column: span 6;">
+        <h4 style="margin:0 0 8px; font-size:13px; color:var(--muted);">RECENT RESERVATIONS</h4>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>ResID</th><th>Date</th><th>Customer</th><th>Restaurant</th><th>Table</th><th>Guests</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              {% for r in reservations %}
+                <tr>
+                  <td>{{ r.ReservationID }}</td>
+                  <td style="white-space:nowrap;">{{ r.ReservationDateTime }}</td>
+                  <td>{{ r.CustomerName }} ({{ r.CustomerID }})</td>
+                  <td>{{ r.RestaurantName }} ({{ r.RestaurantID }})</td>
+                  <td>Table {{ r.TableNumber }} (ID: {{ r.TableID }})</td>
+                  <td>{{ r.PartySize }}</td>
+                  <td>
+                    {% if r.Status == 'BOOKED' %}<span class="badge badge-booked">BOOKED</span>
+                    {% elif r.Status == 'CANCELED' %}<span class="badge badge-canceled">CANCELED</span>
+                    {% elif r.Status == 'COMPLETED' %}<span class="badge badge-completed">COMPLETED</span>
+                    {% else %}{{ r.Status }}{% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="grid-column: span 6; margin-top:8px;">
+        <h4 style="margin:0 0 8px; font-size:13px; color:var(--muted);">RESTAURANTS</h4>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Name</th><th>City</th></tr></thead>
+            <tbody>
+              {% for rr in restaurants %}
+                <tr>
+                  <td>{{ rr.RestaurantID }}</td>
+                  <td>{{ rr.Name }}</td>
+                  <td>{{ rr.City }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="grid-column: span 6; margin-top:8px;">
+        <h4 style="margin:0 0 8px; font-size:13px; color:var(--muted);">DINING TABLES</h4>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>TableID</th><th>RestaurantID</th><th>Table #</th><th>Capacity</th></tr></thead>
+            <tbody>
+              {% for t in tables %}
+                <tr>
+                  <td>{{ t.TableID }}</td>
+                  <td>{{ t.RestaurantID }}</td>
+                  <td>{{ t.TableNumber }}</td>
+                  <td>{{ t.Capacity }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

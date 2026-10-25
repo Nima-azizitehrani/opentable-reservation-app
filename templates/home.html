@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="hero">
+  <h1>Find your next reservation</h1>
+  <p class="muted">Search restaurants, view details, and book via stored procedures (MakeReservation / CancelReservation).</p>
+
+  <form action="{{ url_for('restaurants') }}" method="get" style="margin-top:14px;">
+    <div class="grid" style="margin-top:0;">
+      <div class="card" style="grid-column: span 6;">
+        <label>Search</label>
+        <input name="q" placeholder="Pizza, sushi, steak…" />
+      </div>
+      <div class="card" style="grid-column: span 3;">
+        <label>City</label>
+        <input name="city" placeholder="Chicago" />
+      </div>
+      <div class="card" style="grid-column: span 3; display:flex; align-items:flex-end;">
+        <button class="btn primary" type="submit" style="width:100%;">Search</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <h2>Featured</h2>
+  <p class="muted" style="margin-top:0;">Newest restaurants in your database.</p>
+
+  <div class="restaurant-grid" style="margin-top:12px;">
+    {% for r in featured %}
+      <a class="rest-card" href="{{ url_for('restaurant_detail', restaurant_id=r[0]) }}">
+        <img src="{{ url_for('static', filename=restaurant_image(r[0])) }}" alt="Restaurant photo">
+        <div class="pad">
+          <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start;">
+            <div>
+              <div style="font-weight:700; font-size:16px;">{{ r[1] }}</div>
+              <div class="muted" style="font-size:13px; margin-top:4px;">{{ r[4] }}, {{ r[5] }}</div>
+            </div>
+            <div class="chip">{{ dollars(r[3]) }}</div>
+          </div>
+          <div class="chips">
+            <span class="chip">{{ r[2] }}</span>
+          </div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

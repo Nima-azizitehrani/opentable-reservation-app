@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ title or "OpenTable App" }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body class="{{ body_class or '' }}">
+  <div class="nav">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>OpenTable Mini</div>
+    </div>
+    <div class="navlinks">
+      <a href="{{ url_for('restaurants') }}">Restaurants</a>
+      <a href="{{ url_for('customer_portal') }}">Customers & Reservations</a>
+      <a href="{{ url_for('reports') }}">Reports</a>
+    </div>
+  </div>
+
+  <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>
