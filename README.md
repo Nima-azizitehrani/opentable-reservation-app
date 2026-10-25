@@ -42,7 +42,6 @@ All SQL from the app uses **parameterized queries** — no string-built SQL.
 - Python 3.11+ · Flask 3 · Jinja2 templates
 - MySQL 8 · mysql-connector-python
 - python-dotenv for configuration · gunicorn (production server entry point)
-- pytest for tests · GitHub Actions for CI
 
 ## Setup
 
@@ -74,18 +73,6 @@ flask --app app run --debug
 
 Open http://127.0.0.1:5000
 
-## Tests
-
-The test suite runs **without a live MySQL server** — the database layer is faked at the
-connection/cursor level, so routes are exercised through Flask's test client:
-
-```bash
-pip install pytest
-pytest
-```
-
-CI runs the same suite on every push and pull request (`.github/workflows/ci.yml`).
-
 ## What I learned
 
 - **Database design is application design.** Normalizing to 3NF and pushing invariants (no double-booking,
@@ -95,5 +82,3 @@ CI runs the same suite on every push and pull request (`.github/workflows/ci.yml
   report: window functions and `ROLLUP` replaced what would have been pages of Python aggregation code.
 - **Configuration is a security feature.** Moving credentials into `.env` (and shipping only a
   `.env.example`) made the project safe to share publicly without changing a line of logic.
-- **Tests don't need a real database to be useful.** Faking the connection boundary let me test routing,
-  validation, and stored-procedure calls fast — and makes the suite runnable in CI.
